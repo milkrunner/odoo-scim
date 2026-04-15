@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  odoo:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      # Mount addons for live editing (no rebuild needed)
+      - ./addons/auth_scim:/opt/odoo/addons/auth_scim
+    command:
+      - "--db_host=db"
+      - "--db_port=5432"
+      - "--db_user=odoo"
+      - "--db_password=odoo"
+      - "--database=odoo_scim_test"
+      - "--init=auth_scim"
+      - "--addons-path=/opt/odoo/addons,/opt/odoo/odoo/addons"
+      - "--without-demo=all"
+
+volumes:
+  pgdata:
