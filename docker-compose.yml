@@ -9,15 +9,20 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   odoo:
     build: .
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8069:8069"
     volumes:
-      # Mount addons for live editing (no rebuild needed)
       - ./addons/auth_scim:/opt/odoo/addons/auth_scim
     command:
       - "--db_host=db"
@@ -27,7 +32,8 @@ services:
       - "--database=odoo_scim_test"
       - "--init=auth_scim"
       - "--addons-path=/opt/odoo/addons,/opt/odoo/odoo/addons"
-      - "--without-demo=all"
+      - "--without-demo"
+      - "--http-interface=0.0.0.0"
 
 volumes:
   pgdata:
