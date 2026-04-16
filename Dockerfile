@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     npm \
     && rm -rf /var/lib/apt/lists/*
 
-# Install rtlcss for Odoo
-RUN npm install -g rtlcss
+# Install rtlcss and dart-sass for Odoo asset compilation
+RUN npm install -g rtlcss sass
 
 WORKDIR /opt/odoo
 
