@@ -339,10 +339,10 @@ class SCIMController(http.Controller):
 
         # Grant internal-user access so provisioned users land in the Odoo
         # backend after SSO instead of the empty "You are logged in" page.
-        if 'groups_id' not in vals:
+        if 'group_ids' not in vals:
             internal_group = admin_env.ref('base.group_user', raise_if_not_found=False)
             if internal_group:
-                vals['groups_id'] = [(4, internal_group.id)]
+                vals['group_ids'] = [(4, internal_group.id)]
 
         Users = admin_env['res.users'].with_context(
             no_reset_password=True,
