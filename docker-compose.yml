@@ -34,6 +34,7 @@ services:
       - "--addons-path=/opt/odoo/addons,/opt/odoo/odoo/addons"
       - "--without-demo"
       - "--http-interface=0.0.0.0"
+      - "--proxy-mode"
 
 volumes:
   pgdata:
