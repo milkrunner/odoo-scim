@@ -328,6 +328,14 @@ class SCIMController(http.Controller):
         # Set a random password — user will authenticate via SSO
         vals['password'] = uuid.uuid4().hex
 
+        # auth='none' endpoints run as public user — explicitly pin the main
+        # company so res.users.create doesn't fail on the NOT NULL constraint.
+        if not vals.get('company_id'):
+            main_company = request.env.ref('base.main_company', raise_if_not_found=False)
+            if main_company:
+                vals['company_id'] = main_company.id
+                vals['company_ids'] = [(6, 0, [main_company.id])]
+
         try:
             user = request.env['res.users'].sudo().with_context(
                 no_reset_password=True,

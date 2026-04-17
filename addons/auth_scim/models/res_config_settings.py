@@ -18,5 +18,8 @@ class ResConfigSettings(models.TransientModel):
     @api.depends('scim_enabled')
     def _compute_scim_base_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', '')
+        # Entra requires https for the SCIM tenant URL
+        if base_url.startswith('http://'):
+            base_url = 'https://' + base_url[len('http://'):]
         for record in self:
             record.scim_base_url = f"{base_url}/scim/v2"
