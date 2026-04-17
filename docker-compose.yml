@@ -24,6 +24,7 @@ services:
       - "8069:8069"
     volumes:
       - ./addons/auth_scim:/opt/odoo/addons/auth_scim
+      - odoo_data:/root/.local/share/Odoo
     command:
       - "--db_host=db"
       - "--db_port=5432"
@@ -38,3 +39,4 @@ services:
 
 volumes:
   pgdata:
+  odoo_data:
