@@ -3,7 +3,6 @@
 import logging
 
 from odoo import api, fields, models
-from odoo.exceptions import AccessDenied
 
 _logger = logging.getLogger(__name__)
 
@@ -24,38 +23,33 @@ class ResUsers(models.Model):
 
     @api.model
     def _auth_oauth_signin(self, provider, validation, params):
-        """Allow SCIM-provisioned users to sign in via OAuth on first contact.
+        """Link SCIM-provisioned users to OAuth on first sign-in.
 
-        Odoo's default flow matches users by (oauth_provider_id, oauth_uid).
-        For users created by SCIM those fields are empty, so the first OAuth
-        login fails. When that happens, fall back to matching by email/login
-        on the SCIM-provisioned pool and populate oauth_uid/oauth_provider_id
-        so subsequent logins take the fast path.
+        Must run *before* super(): otherwise Odoo's default signup path may
+        auto-create a fresh user with a synthetic `provider_N_user_X` login
+        when the oauth_uid lookup misses, leaving the real SCIM user dangling
+        and producing a duplicate account.
         """
-        try:
-            return super()._auth_oauth_signin(provider, validation, params)
-        except AccessDenied:
-            login = (
-                validation.get('email')
-                or validation.get('preferred_username')
-                or validation.get('upn')
-            )
-            if not login:
-                raise
-
-            user = self.sudo().search([
-                ('login', '=ilike', login),
+        email = (
+            validation.get('email')
+            or validation.get('preferred_username')
+            or validation.get('upn')
+        )
+        if email:
+            scim_user = self.sudo().search([
+                ('login', '=ilike', email),
                 ('scim_external_id', '!=', False),
             ], limit=1)
-            if not user:
-                raise
+            if scim_user:
+                scim_user.write({
+                    'oauth_provider_id': provider,
+                    'oauth_uid': validation['user_id'],
+                    'oauth_access_token': params['access_token'],
+                })
+                _logger.info(
+                    'SCIM: linked OAuth identity to provisioned user %s',
+                    scim_user.login,
+                )
+                return scim_user.login
 
-            user.write({
-                'oauth_provider_id': provider,
-                'oauth_uid': validation['user_id'],
-                'oauth_access_token': params['access_token'],
-            })
-            _logger.info(
-                'SCIM: linked OAuth identity to SCIM-provisioned user %s', user.login,
-            )
-            return user.login
+        return super()._auth_oauth_signin(provider, validation, params)
