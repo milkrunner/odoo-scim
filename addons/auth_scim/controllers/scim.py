@@ -250,7 +250,7 @@ class SCIMController(http.Controller):
     # SCIM User endpoints
     # ------------------------------------------------------------------
 
-    @http.route('/scim/v2/Users', type='http', auth='none', methods=['GET'],
+    @http.route('/scim/v2/Users', type='http', auth='public', methods=['GET'],
                 csrf=False, save_session=False)
     def scim_get_users(self, **kwargs):
         auth_error = self._scim_authenticate()
@@ -278,7 +278,7 @@ class SCIMController(http.Controller):
             'Resources': [self._user_to_scim(u) for u in users],
         })
 
-    @http.route('/scim/v2/Users/<int:user_id>', type='http', auth='none',
+    @http.route('/scim/v2/Users/<int:user_id>', type='http', auth='public',
                 methods=['GET'], csrf=False, save_session=False)
     def scim_get_user(self, user_id, **kwargs):
         auth_error = self._scim_authenticate()
@@ -293,7 +293,7 @@ class SCIMController(http.Controller):
 
         return self._scim_response(self._user_to_scim(user))
 
-    @http.route('/scim/v2/Users', type='http', auth='none', methods=['POST'],
+    @http.route('/scim/v2/Users', type='http', auth='public', methods=['POST'],
                 csrf=False, save_session=False)
     def scim_create_user(self, **kwargs):
         auth_error = self._scim_authenticate()
@@ -328,7 +328,7 @@ class SCIMController(http.Controller):
         # Set a random password — user will authenticate via SSO
         vals['password'] = uuid.uuid4().hex
 
-        # auth='none' runs as public user. Switch to a proper admin env with
+        # auth='public' runs as public user. Switch to a proper admin env with
         # the main company pinned, otherwise computed fields on the new user
         # crash on empty/company-less envs.
         admin_env = request.env(user=SUPERUSER_ID)
@@ -355,7 +355,7 @@ class SCIMController(http.Controller):
 
         return self._scim_response(self._user_to_scim(user), status=201)
 
-    @http.route('/scim/v2/Users/<int:user_id>', type='http', auth='none',
+    @http.route('/scim/v2/Users/<int:user_id>', type='http', auth='public',
                 methods=['PATCH'], csrf=False, save_session=False)
     def scim_patch_user(self, user_id, **kwargs):
         auth_error = self._scim_authenticate()
@@ -380,7 +380,7 @@ class SCIMController(http.Controller):
         self._apply_patch_operations(user, operations)
         return self._scim_response(self._user_to_scim(user))
 
-    @http.route('/scim/v2/Users/<int:user_id>', type='http', auth='none',
+    @http.route('/scim/v2/Users/<int:user_id>', type='http', auth='public',
                 methods=['PUT'], csrf=False, save_session=False)
     def scim_replace_user(self, user_id, **kwargs):
         """Full user replace — Entra rarely uses this, but some IdPs do."""
@@ -405,7 +405,7 @@ class SCIMController(http.Controller):
 
         return self._scim_response(self._user_to_scim(user))
 
-    @http.route('/scim/v2/Users/<int:user_id>', type='http', auth='none',
+    @http.route('/scim/v2/Users/<int:user_id>', type='http', auth='public',
                 methods=['DELETE'], csrf=False, save_session=False)
     def scim_delete_user(self, user_id, **kwargs):
         auth_error = self._scim_authenticate()
@@ -428,7 +428,7 @@ class SCIMController(http.Controller):
     # SCIM Discovery endpoints
     # ------------------------------------------------------------------
 
-    @http.route('/scim/v2/ServiceProviderConfig', type='http', auth='none',
+    @http.route('/scim/v2/ServiceProviderConfig', type='http', auth='public',
                 methods=['GET'], csrf=False, save_session=False)
     def scim_service_provider_config(self, **kwargs):
         """Service Provider Configuration — required by Entra during setup test."""
@@ -453,7 +453,7 @@ class SCIMController(http.Controller):
             }],
         })
 
-    @http.route('/scim/v2/Schemas', type='http', auth='none', methods=['GET'],
+    @http.route('/scim/v2/Schemas', type='http', auth='public', methods=['GET'],
                 csrf=False, save_session=False)
     def scim_schemas(self, **kwargs):
         """SCIM Schema discovery — Entra queries this during connection test."""
@@ -546,7 +546,7 @@ class SCIMController(http.Controller):
             'Resources': [user_schema],
         })
 
-    @http.route('/scim/v2/ResourceTypes', type='http', auth='none', methods=['GET'],
+    @http.route('/scim/v2/ResourceTypes', type='http', auth='public', methods=['GET'],
                 csrf=False, save_session=False)
     def scim_resource_types(self, **kwargs):
         auth_error = self._scim_authenticate()
