@@ -18,7 +18,7 @@ Supported operations:
 - User deactivation (DELETE /scim/v2/Users/:id)
 - Schema discovery (GET /scim/v2/Schemas, /ServiceProviderConfig)
 """,
-    'depends': ['base', 'web', 'base_setup'],
+    'depends': ['base', 'web', 'base_setup', 'auth_oauth'],
     'data': [
         'security/ir.model.access.csv',
         'views/res_config_settings_views.xml',
