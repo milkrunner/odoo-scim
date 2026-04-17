@@ -103,7 +103,9 @@ class SCIMController(http.Controller):
         vals = {}
 
         if 'userName' in data:
-            vals['login'] = data['userName']
+            # Normalize to lowercase so OAuth logins (which Entra sends in
+            # lowercase) match the SCIM-provisioned account.
+            vals['login'] = data['userName'].lower()
 
         if 'externalId' in data:
             vals['scim_external_id'] = data['externalId']

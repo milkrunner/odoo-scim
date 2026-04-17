@@ -44,7 +44,7 @@ class ResUsers(models.Model):
                 raise
 
             user = self.sudo().search([
-                ('login', '=', login),
+                ('login', '=ilike', login),
                 ('scim_external_id', '!=', False),
             ], limit=1)
             if not user:
